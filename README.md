@@ -3,9 +3,9 @@ Ce script permet d'automatiser certaines tâches de personnalisation de Grub.
 
 Testé sur Ubuntu 20.04, Fedora 35 et Arch linux 2021.
 
-Ce script permet d'automatiser certaines tâches de personnalisation de Grub.
+# Ce script permet d'automatiser certaines tâches de personnalisation de Grub.
 
-Ce script attend en entrée certains objets :
+## Ce script attend en entrée certains objets :
 
 a. un dossier de thème valide, exemple :
 ```
@@ -21,7 +21,7 @@ a. un dossier de thème valide, exemple :
 ```
 b. Une image pour le background de grub si on veut la personnalisée (Optionnel).
 
-Tâches principales du script : 
+## Tâches principales du script : 
 
  1. Installer de nouveaux thèmes Grub.
  2. Possibilité de changer l'image de background du thème installé.
@@ -29,7 +29,7 @@ Tâches principales du script :
  4. Désinstaller un thème.
  5. Remètre la configuration de grub par défaut.  
                                                    
-Autres tâches exécutées par le script :
+## Autres tâches exécutées par le script :
 
  1. Sauvegarde de la configuration de Grub : /etc/default/grub.save
  
@@ -56,8 +56,8 @@ Autres tâches exécutées par le script :
 
  7. Détecte le mode de boot UEFI ou LEGACY.
                                                                                                      
-Usage:
+## Usage:
 1. Télécharger un thème pour Grub : https://www.gnome-look.org/browse?cat=109
 2. Décompresser le thème.
 3. Télécharger éventuellement une image de fond pour adapter à un thème (optionnel).
-4. Lancer le script et laisser-vous guider : ./grub_custom.sh
+4. Lancer le script et laisser-vous guider : ./grub_theme_conf.sh
