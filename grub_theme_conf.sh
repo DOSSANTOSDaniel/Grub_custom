@@ -2,7 +2,7 @@
 #-*- coding: UTF8 -*-
 
 #--------------------------------------------------#
-# Script_Name: grub_custom.sh	                               
+# Script_Name: grub_theme_conf.sh	                               
 #                                                   
 # Author:  'dossantosjdf@gmail.com'                 
 # Date:     23/02/2022 04:29:15                                             
@@ -63,11 +63,16 @@
 # 6. Installation de dépendances :
 #    1. Pour Ubuntu 20.4 : "imagemagick","x11-xserver-utils","libfile-mimeinfo-perl".
 #    2. Pour Fedora 35 : "ImageMagick","xrandr","perl-File-MimeInfo".
+#    3. Pour Arch : "glibc" "libmagick" "imagemagick" "xorg-xrandr" "perl-file-mimeinfo".
 #
 # 7. Détecte le mode de boot UEFI ou LEGACY.
 #                                                                                                     
-#  Usage:
-#  ./grub_custom.sh
+# Usage:
+#
+# 1. Télécharger un thème pour Grub : https://www.gnome-look.org/browse?cat=109
+# 2. Décompresser le thème.
+# 3. Télécharger éventuellement une image de fond pour adapter à un thème (optionnel).
+# 4. Lancer le script et laisser-vous guider : ./grub_theme_conf.sh
 #                                                   
 # Limits:                                          
 #                                                   
