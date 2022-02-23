@@ -61,9 +61,9 @@
 #     2. format PNG et TAG : non indexée, sRGB.
 #
 # 6. Installation de dépendances :
-#    1. Pour Ubuntu 20.4 : "imagemagick","x11-xserver-utils","libfile-mimeinfo-perl".
-#    2. Pour Fedora 35 : "ImageMagick","xrandr","perl-File-MimeInfo".
-#    3. Pour Arch : "glibc" "libmagick" "imagemagick" "xorg-xrandr" "perl-file-mimeinfo".
+#    1. Pour Ubuntu 20.4 : "imagemagick","x11-xserver-utils".
+#    2. Pour Fedora 35 : "ImageMagick","xrandr".
+#    3. Pour Arch : "glibc" "libmagick" "imagemagick" "xorg-xrandr".
 #
 # 7. Détecte le mode de boot UEFI ou LEGACY.
 #                                                                                                     
@@ -81,6 +81,7 @@
 
 ############################## Functions #############################################
 ######################################################################################
+
 
 modify_grub_config() {
   echo "Modification du fichier de configuration de Grub"
@@ -165,7 +166,7 @@ search_images() {
   while :
   do
     clear
-    echo -e "\n[-- Menu fichiers --->\n"
+    echo -e "\n[--- Menu fichiers images --->\n"
   
     mapfile -t files < <(ls -B ${full_path})
   
@@ -194,44 +195,45 @@ search_images() {
     done
   
     # check if valid image
-    
     if [[ -f "$full_path" ]]
     then
-      local ext
-      ext="$(mimetype "$full_path")"
+      local file_type
+      file_type="$(file -b --mime-type "$full_path" | cut -d '/' -f1)"
       
-      if [[ "$ext" =~ image/* ]]
+      if [[ "$file_type" == "image" ]]
       then
-	clear
+	      clear
         echo "Image valide"
-        new_grub_img="$full_path"
-        
+        select_img_user="$full_path"
+
+	      part_base_user_img="$(basename "$select_img_user")"
+
         # show resolution
-        screen_size="$(xrandr | grep -F '*' | awk '{print $1}')"
-        local img_size
-        img_size="$(identify "$new_grub_img" | cut -d ' ' -f3)"    
-        local screen_size_w
-        screen_size_w="$(xrandr | grep -F '*' | awk '{print $1}' | cut -d 'x' -f1)"
-        local screen_size_h
-        screen_size_h="$(xrandr | grep -F '*' | awk '{print $1}' | cut -d 'x' -f2)"
-        local img_size_w     
-        img_size_w="$(echo "$img_size" | cut -d 'x' -f1)"
-        local img_size_h
-        img_size_h="$(echo "$img_size" | cut -d 'x' -f2)"
+        screen_user_size="$(xrandr | grep -F '*' | awk '{print $1}')"
+        img_user_size="$(identify "$select_img_user" | cut -d ' ' -f3)"
+            
+        screen_user_size_w="$(echo "$screen_user_size" | cut -d 'x' -f1)"
+        screen_user_size_h="$(echo "$screen_user_size" | cut -d 'x' -f2)"
+            
+        img_user_size_w="$(echo "$img_user_size" | cut -d 'x' -f1)"
+        img_user_size_h="$(echo "$img_user_size" | cut -d 'x' -f2)"
         
-        if [[ "$img_size_w" -lt "$screen_size_w" || "$img_size_h" -lt "$screen_size_h" ]]
+        if [[ "$img_user_size_w" -lt "$screen_user_size_w" || "$img_user_size_h" -lt "$screen_user_size_h" ]]
         then
           echo "L'image selectionnée a une résolution inférieur à celle du système !"
-          echo "Image : $(basename "$new_grub_img")"
-          echo "La résolution de votre image : $img_size"
-          echo "La résolution sur votre système : $screen_size"     
+          echo "Image : $part_base_user_img"
+          echo "La résolution de votre image : $img_user_size"
+          echo "La résolution sur votre système : $screen_user_size"     
        
           read -p "Voulez vous vraiment utiliser cette image ? [o/n] : " resp_use_img
           case "$resp_use_img" in
-          [o][O][OUI]|[oui]) 
-            screen_size="$img_size"
+          [oO]|[Oo][Uu][iI]) 
+            screen_user_size="$img_user_size"
             break
-          ;;
+            ;;
+          [Nn]|[Nn][Oo][Nn])
+            exit 0
+            ;;
           *)
             full_path=$(dirname "$full_path")
             set +e
@@ -244,30 +246,40 @@ search_images() {
       fi
     fi
   done
-  # new_grub_img
-  # screen_size
 }
 
 
 add_image() {
-  # Backup old background image
-  [[ -d /home/"${username}"/Images/background_grub_backup ]] || (mkdir -p /home/"${username}"/Images/background_grub_backup && chown -R "${username}":"${username}" /home/"${username}"/Images/background_grub_backup)
+  img_size="$screen_user_size"
+  img_user="$select_img_user"
   
+  # Backup old image
+    if [[ ! -d /home/"${username}"/Images/background_grub_backup ]]
+    then
+      mkdir -p /home/"${username}"/Images/background_grub_backup
+      chown -R "${username}":"${username}" /home/"${username}"/Images/background_grub_backup
+    fi
   # Current theme grub
   current_theme_file="$(grep "^GRUB_THEME=.*$" /etc/default/grub | cut -d '"' -f2)"
   current_theme_dir="$(dirname "$current_theme_file")"
-  echo "Backup de l'ancienne image de grub : /home/"${username}"/Images/background_grub_backup/"${old_img_grub}""
-  if cp "${current_theme_dir}"/background.png /home/"${username}"/Images/background_grub_backup/"${old_img_grub}"
+  theme_img_name="$(grep "^desktop-image: .*" "${current_theme_dir}"/theme.txt | awk '{print $2}' | tr -d '"' | tr -d \')"
+  
+  echo "Backup image old"
+  if [[ -f "${current_theme_dir}"/"${theme_img_name}" ]]
   then
+    mv "${current_theme_dir}"/"${theme_img_name}" /home/"${username}"/Images/background_grub_backup/"${old_img_grub}"
     chown "${username}":"${username}" /home/"${username}"/Images/background_grub_backup/"${old_img_grub}"
-    #format JPG/JPEG : 8-bit (256 color), non indexée, RGB.
-    #format PNG and TAG : non indexée, RGB.
-    echo "Convertion de l'image $new_grub_img et sauvegarde"
-    convert "$new_grub_img" -depth 8 -resize "${screen_size}"+0+0 -colorspace sRGB "${current_theme_dir}"/background.png
   else
-    echo "Erreur de la copie de l'image"
-    exit 0
+    echo "Pas d'image à sauvegarder"
   fi
+    
+  echo "Convertion de l'image $img_user ---> ${current_theme_dir}/background.png"
+  #format JPG/JPEG : 8-bit (256 color), non indexée, RGB.
+  #format PNG and TAG : non indexée, RGB.
+  convert "$img_user" -depth 8 -resize "${img_size}"+0+0 -colorspace sRGB "${current_theme_dir}"/background.png
+
+  # Change theme config
+  sed -i 's/desktop-image: .*\"/desktop-image: \"background.png\"/g' "${current_theme_dir}"/theme.txt
 }
 
 
@@ -285,7 +297,7 @@ search_themes() {
     clear
     echo -e "\n[-- Menu fichiers --->\n"
   
-    mapfile -t files < <(ls ${full_path})
+    mapfile -t files < <(ls -B ${full_path})
   
     select ITEM in "${files[@]}" 'Retour' 'Quitter'
     do
@@ -500,7 +512,7 @@ debian|ubuntu)
     apt-get update -q  
     dpkg -s "imagemagick" > /dev/null || apt-get install imagemagick -qy
     dpkg -s "x11-xserver-utils" > /dev/null || apt-get install x11-xserver-utils -qy
-    dpkg -s "libfile-mimeinfo-perl" > /dev/null || apt-get install libfile-mimeinfo-perl -qy
+    #dpkg -s "libfile-mimeinfo-perl" > /dev/null || apt-get install libfile-mimeinfo-perl -qy
   else
     echo 'Gestionnaire de paquets non prit en charge'
     exit 0
@@ -513,7 +525,7 @@ centos|fedora|almalinux)
     dnf check-update --refresh -y  
     rpm -qi "ImageMagick" > /dev/null || dnf install ImageMagick -qy
     rpm -qi "xrandr" > /dev/null || dnf install xrandr -qy
-    rpm -qi "perl-File-MimeInfo" > /dev/null || dnf install perl-File-MimeInfo -qy
+    #rpm -qi "perl-File-MimeInfo" > /dev/null || dnf install perl-File-MimeInfo -qy
   else
     echo 'INFO : Gestionnaire de paquets non prit en charge'
     exit 0
@@ -536,7 +548,7 @@ arch)
   pacman -Syyq 
   command -v "convert" || pacman -S glibc libmagick imagemagick --noconfirm
   command -v "xrandr" || pacman -S xorg-xrandr --noconfirm
-  command -v "mimetype" || pacman -S perl-file-mimeinfo --noconfirm
+  #command -v "mimetype" || pacman -S perl-file-mimeinfo --noconfirm
   ;;
 *)
   echo "Gestionnaire de paquets non prit en charge"
@@ -551,34 +563,38 @@ fi
 
 clear
 
-PS3="Votre choix : "
-options=("Installer un nouveau thème" "Changer l'image de fond" "Basculer sur un autre thème" "Désinstaller un thème" "Réstaurer la configuration par défaut" "quitter[q/Q]")
-
-echo -e "\n ------------ Menu ------------ "
-select ITEM in "${options[@]}"
+while :
 do
-  case ${REPLY} in
-    1) echo -e "\n Installation d'un nouveau thème !"
-      modify_grub_config
-      search_themes
-      add_new_theme
-      break;;
-    2) echo -e "\n Changement du fond d'écran de grub !"
-    	search_images
+
+  PS3=" Votre choix : "
+  options=("Installer un nouveau thème" "Changer l'image de fond" "Basculer sur un autre thème" "Désinstaller un thème" "Réstaurer la configuration par défaut" "quitter[q/Q]")
+
+  echo -e "\n ------------ Menu ------------ \n"
+  select ITEM in "${options[@]}"
+  do
+    case ${REPLY} in
+      1) echo -e "\n Installation d'un nouveau thème !"
+        modify_grub_config
+        search_themes
+        add_new_theme
+        break;;
+      2) echo -e "\n Changement du fond d'écran de grub !"
+        search_images
     	add_image
-      break;;
-    3) echo -e "\n Changement du thème de grub !"
-      show_installed_themes
+        break;;
+      3) echo -e "\n Changement du thème de grub !"
+        show_installed_themes
     	switch_theme
-      break;;
-    4) echo -e "\n Désinstallation d'un thème !"
-      show_installed_themes
+        break;;
+      4) echo -e "\n Désinstallation d'un thème !"
+        show_installed_themes
     	delete_theme
-      break;;
-    5) echo -e "\n Réstaurer la configuration par defaut de grub !"
+        break;;
+      5) echo -e "\n Réstaurer la configuration par defaut de grub !"
     	restore_grub_config
-      break;;            
-    6|Q|q) exit;;
+        break;;            
+    6|[Qq]|[Qq][Uu][Ii][Tt][Tt][Ee][Rr]) exit 0;;
     *) echo "Choix $REPLY incorrect !";;
-  esac
+    esac
+  done
 done
