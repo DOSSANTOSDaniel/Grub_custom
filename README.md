@@ -1,6 +1,4 @@
 # Grub_custom
-Ce script permet d'automatiser certaines tâches de personnalisation de Grub.
-
 Testé sur Ubuntu 20.04, Fedora 35 et Arch linux 2021.
 
 # Ce script permet d'automatiser certaines tâches de personnalisation de Grub.
