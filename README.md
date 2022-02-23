@@ -32,7 +32,7 @@ b. Une image pour le background de grub si on veut la personnalisée (Optionnel)
  1. Sauvegarde de la configuration de Grub : /etc/default/grub.save
  
  2. Sauvegarde de la précédente image de background de Grub dans :
-    /home/<user>/Images/background_grub_backup/
+    /home/user/Images/background_grub_backup/
  
  3. Crée un fichier de métadonnées pour détecter si c'est une première installation :
     /boot/grub/themes/.script_grub_custom.txt
