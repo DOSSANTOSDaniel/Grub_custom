@@ -49,9 +49,9 @@ b. Une image pour le background de grub si on veut la personnalisée (Optionnel)
      2. format PNG et TAG : non indexée, sRGB.
 
  6. Installation de dépendances :
-    1. Pour Ubuntu 20.4 : "imagemagick" "x11-xserver-utils" "libfile-mimeinfo-perl".
-    2. Pour Fedora 35 : "ImageMagick" "xrandr" "perl-File-MimeInfo".
-    3. Pour Arch : "glibc" "libmagick" "imagemagick" "xorg-xrandr" "perl-file-mimeinfo".
+    1. Pour Ubuntu 20.4 : "imagemagick" "x11-xserver-utils".
+    2. Pour Fedora 35 : "ImageMagick" "xrandr".
+    3. Pour Arch : "glibc" "libmagick" "imagemagick" "xorg-xrandr".
 
  7. Détecte le mode de boot UEFI ou LEGACY.
                                                                                                      
