@@ -82,7 +82,6 @@
 ############################## Functions #############################################
 ######################################################################################
 
-
 modify_grub_config() {
   echo "Modification du fichier de configuration de Grub"
   # Check themes directory
